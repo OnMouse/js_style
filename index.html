@@ -1,0 +1,83 @@
+<script type="text/javascript">
+//自封装划线函数
+function links(arg, where) {
+	for(var i = 0; i < arg.length; i++) {
+		var x = arg[i].x; //获得传入圆点的坐标
+		var y = arg[i].y;
+		var newDiv = $('<div class="pp"></div>'); //创建圆点
+		//console.log(newDiv);
+		newDiv.appendTo(where); //将创建的圆点添加到传入的参数where里
+		var newWidth = newDiv.width();
+		var newHeight = newDiv.height();
+		var w = parseInt(x) - newDiv.width() / 2 / $('body').width() * 100 + '%'; //求出圆点的最外层的坐标，也就是要画的线的起点和终点坐标								
+		var h = parseInt(y) - newDiv.height() / 2 / $('body').height() * 100 + '%';
+		//console.log(w);
+		//console.log(h);
+		newDiv.css({
+			left: x,
+			top: y,
+			width: 0,
+			height: 0
+		});
+		if(i == 0) {
+			newDiv.css({
+				opacity: 0
+			})
+		} //也就是未到该页面，动画执行的函数为被调用时，圆点和线都不显示
+		newDiv.delay().animate().css({
+			'-webkit-transition': '.6s ' + (i * .6) + 's',
+			transition: '.6s ' + (i * .6) + 's',
+			width: newWidth,
+			height: newHeight,
+			left: w,
+			top: h
+		});
+	}
+	if(where.find(".pp").length > 1) {
+		var xx = [];
+		var yy = []; //用来存储圆点之间要画的线的坐标
+		for(var j = 0; j < where.find(".pp").length; j++) {
+			xx.push(parseInt(where.find(".pp").eq(j).css('left')) + where.find('.pp').eq(j).width() / 2);
+			yy.push(parseInt(where.find('.pp').eq(j).css('top')) + where.find('.pp').eq(j).height() / 2);
+		}
+		var z; //定义斜边
+		function getAngle(x1, y1, x2, y2) {
+			var x = Math.abs(x1 - x2); //两条直角边的长
+			var y = Math.abs(y1 - y2);
+			z = Math.sqrt(x * x + y * y); //开平方函数求斜边
+			//console.log(z);
+			var cos = y / z; //余弦
+			var radian = Math.acos(cos); //Math.acos(x) 方法可返回一个数的反余弦。返回的值是 0 到 PI 之间的弧度值,如果参数 x 超过了 -1.0 ~ 1.0 的范围，那么浏览器将返回 NaN。如果参数 x 取值 -1，那么将返回 PI。
+			var angle = 180 / (Math.PI / radian); //求画线的角度
+			return angle;
+		}
+		where.find(".pp").eq(0).remove();
+		for(var j = 0; j < xx.length - 1; j++) {
+			var a = getAngle(xx[j], yy[j], xx[j + 1], yy[j + 1]); //每一个线的角度
+			a -= 90;
+			if(yy[j] - yy[j + 1] < 0) {
+				a *= -1
+			};
+			if(xx[j] - xx[j + 1] > 0) {
+				a -= 180;
+				a *= -1;
+			}
+			var newLi = $('<p class="line"></p>'); //创建线条
+			newLi.appendTo(where); //添加线条
+			var lineH = newLi.height() / 2;
+			newLi.css({
+				transform: 'rotate(' + a + 'deg)',
+				width: 0,
+				transformOrigin: 'left center',
+				left: xx[j],
+				top: yy[j] - lineH
+			});
+			newLi.delay().animate().css({
+				'-webkit-transition': '.6s ' + (j * .6 + .3) + 's',
+				transition: '.6s ' + (j * .6 + .3) + 's',
+				width: z
+			});
+		}
+	}
+}
+</script>
